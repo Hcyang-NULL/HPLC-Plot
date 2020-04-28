@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% autoescape None %}
+    <meta charset="UTF-8">
+    <title>HPLC</title>
+    <link href="{{ static_url('css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ static_url('css/common.css') }}" rel="stylesheet">
+    <link href="{{ static_url('css/loading.css') }}" rel="stylesheet">
+    <script src="{{ static_url('js/jquery.min.js') }}"></script>
+    <script src="{{ static_url('js/jquery.cookie.js') }}"></script>
+    <script src="{{ static_url('js/bootstrap.min.js') }}"></script>
+    <script src="{{ static_url('js/popper.min.js') }}"></script>
+    <script src="{{ static_url('js/home.js') }}"></script>
+    <script type="text/javascript">
+        {
+            {
+                js
+            }
+        }
+    </script>
+</head>
+<body>
+<div id="top-item">
+    <nav class="navbar navbar-expand-md bg-light navbar-light g_head" id="no-user">
+        <div class="container p-2" style="width: 100%">
+            <div style="width: 100%; text-align: center; float: left">
+                <div class="font-weight-light" style="line-height: 150%; font-size: 20px">
+                    <text>HPLC Plot</text>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid" style="background-color: white">
+        <div class="hplc-img">
+            {% if hplc_id == -1 %}
+            <img src="/static/hplc_imgs/default.png">
+            {% end %}
+            {% if hplc_id != -1 %}
+            <img src="/static/hplc_imgs/{{hplc_id}}.png">
+            {% end %}
+        </div>
+    </div>
+    <div style="width: 100%; text-align: center; padding-top: 30px; padding-bottom: 30px; background-color: white">
+        <text class="font-weight-light" style="line-height: 150%; font-size: 20px">Parameters Control</text>
+    </div>
+</div>
+<div id="blank">
+
+</div>
+<div class="container" style="margin-bottom: 100px">
+    <form action="https://www.ly0505.top/plot" enctype="multipart/form-data" method="POST" name="form">
+        <div class="parameters">
+            <div class="accordion" id="accordionExample">
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                        <h2 class="mb-0">
+                            <button aria-controls="collapseOne" aria-expanded="true"
+                                    class="btn btn-link btn-block text-left"
+                                    data-target="#collapseOne" data-toggle="collapse" type="button">
+                                峰参数
+                            </button>
+                        </h2>
+                    </div>
+                    <div aria-labelledby="headingOne" class="collapse show" data-parent="#accordionExample"
+                         id="collapseOne">
+                        <div class="card-body">
+                            <div style="text-align: center; padding-bottom: 10px;">
+                                说明：峰编号顺序无任何影响，a表示峰的最大Y值，μ表示峰中心X坐标，σ2为方差，方差越大，峰越胖，反之越尖，积分值目前只能通过设定好a、μ、σ2后点击画图后计算得出
+                            </div>
+                            <input id="peak_num" name="peak_num" type="hidden" value="{{peak_num}}"/>
+                            <table class="table table-bordered" name="table" style="text-align: center">
+                                <thead>
+                                <tr>
+                                    <th id="peak" scope="col">峰编号</th>
+                                    <th scope="col">a</th>
+                                    <th scope="col">μ</th>
+                                    <th scope="col">σ2</th>
+                                    <th scope="col">积分值</th>
+                                    <th scope="col">积分段</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr id="tr1" style="{{table_css[0]}}">
+                                    <th scope="row">1</th>
+                                    <td class="peak-td" contenteditable="true" id="a1">{{a[0]}}</td>
+                                    <input id="input-a1" name="a1" type="hidden" value="{{a[0]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b1">{{b[0]}}</td>
+                                    <input id="input-b1" name="b1" type="hidden" value="{{b[0]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c1">{{c[0]}}</td>
+                                    <input id="input-c1" name="c1" type="hidden" value="{{c[0]}}"/>
+                                    <td class="integrate">{{inte_lis[0]}}</td>
+                                    {% if red_lis[0] is True %}
+                                    <td class="red_line"><input checked="false" name="yy1" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[0] is False %}
+                                    <td class="red_line"><input name="yy1" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr2" style="{{table_css[1]}}">
+                                    <th scope="row">2</th>
+                                    <td class="peak-td" contenteditable="true" id="a2">{{a[1]}}</td>
+                                    <input id="input-a2" name="a2" type="hidden" value="{{a[1]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b2">{{b[1]}}</td>
+                                    <input id="input-b2" name="b2" type="hidden" value="{{b[1]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c2">{{c[1]}}</td>
+                                    <input id="input-c2" name="c2" type="hidden" value="{{c[1]}}"/>
+                                    <td class="integrate">{{inte_lis[1]}}</td>
+                                    {% if red_lis[1] is True %}
+                                    <td class="red_line"><input checked="false" name="yy2" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[1] is False %}
+                                    <td class="red_line"><input name="yy2" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr3" style="{{table_css[2]}}">
+                                    <th scope="row">3</th>
+                                    <td class="peak-td" contenteditable="true" id="a3">{{a[2]}}</td>
+                                    <input id="input-a3" name="a3" type="hidden" value="{{a[2]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b3">{{b[2]}}</td>
+                                    <input id="input-b3" name="b3" type="hidden" value="{{b[2]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c3">{{c[2]}}</td>
+                                    <input id="input-c3" name="c3" type="hidden" value="{{c[2]}}"/>
+                                    <td class="integrate">{{inte_lis[2]}}</td>
+                                    {% if red_lis[2] is True %}
+                                    <td class="red_line"><input checked="false" name="yy3" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[2] is False %}
+                                    <td class="red_line"><input name="yy3" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr4" style="{{table_css[3]}}">
+                                    <th scope="row">4</th>
+                                    <td class="peak-td" contenteditable="true" id="a4">{{a[3]}}</td>
+                                    <input id="input-a4" name="a4" type="hidden" value="{{a[3]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b4">{{b[3]}}</td>
+                                    <input id="input-b4" name="b4" type="hidden" value="{{b[3]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c4">{{c[3]}}</td>
+                                    <input id="input-c4" name="c4" type="hidden" value="{{c[3]}}"/>
+                                    <td class="integrate">{{inte_lis[3]}}</td>
+                                    {% if red_lis[3] is True %}
+                                    <td class="red_line"><input checked="false" name="yy4" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[3] is False %}
+                                    <td class="red_line"><input name="yy4" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr5" style="{{table_css[4]}}">
+                                    <th scope="row">5</th>
+                                    <td class="peak-td" contenteditable="true" id="a5">{{a[4]}}</td>
+                                    <input id="input-a5" name="a5" type="hidden" value="{{a[4]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b5">{{b[4]}}</td>
+                                    <input id="input-b5" name="b5" type="hidden" value="{{b[4]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c5">{{c[4]}}</td>
+                                    <input id="input-c5" name="c5" type="hidden" value="{{c[4]}}"/>
+                                    <td class="integrate">{{inte_lis[4]}}</td>
+                                    {% if red_lis[4] is True %}
+                                    <td class="red_line"><input checked="false" name="yy5" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[4] is False %}
+                                    <td class="red_line"><input name="yy5" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr6" style="{{table_css[5]}}">
+                                    <th scope="row">6</th>
+                                    <td class="peak-td" contenteditable="true" id="a6">{{a[5]}}</td>
+                                    <input id="input-a6" name="a6" type="hidden" value="{{a[5]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b6">{{b[5]}}</td>
+                                    <input id="input-b6" name="b6" type="hidden" value="{{b[5]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c6">{{c[5]}}</td>
+                                    <input id="input-c6" name="c6" type="hidden" value="{{c[5]}}"/>
+                                    <td class="integrate">{{inte_lis[5]}}</td>
+                                    {% if red_lis[5] is True %}
+                                    <td class="red_line"><input checked="false" name="yy6" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[5] is False %}
+                                    <td class="red_line"><input name="yy6" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr7" style="{{table_css[6]}}">
+                                    <th scope="row">7</th>
+                                    <td class="peak-td" contenteditable="true" id="a7">{{a[6]}}</td>
+                                    <input id="input-a7" name="a7" type="hidden" value="{{a[6]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b7">{{b[6]}}</td>
+                                    <input id="input-b7" name="b7" type="hidden" value="{{b[6]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c7">{{c[6]}}</td>
+                                    <input id="input-c7" name="c7" type="hidden" value="{{c[6]}}"/>
+                                    <td class="integrate">{{inte_lis[6]}}</td>
+                                    {% if red_lis[6] is True %}
+                                    <td class="red_line"><input checked="false" name="yy7" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[6] is False %}
+                                    <td class="red_line"><input name="yy7" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr8" style="{{table_css[7]}}">
+                                    <th scope="row">8</th>
+                                    <td class="peak-td" contenteditable="true" id="a8">{{a[7]}}</td>
+                                    <input id="input-a8" name="a8" type="hidden" value="{{a[7]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b8">{{b[7]}}</td>
+                                    <input id="input-b8" name="b8" type="hidden" value="{{b[7]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c8">{{c[7]}}</td>
+                                    <input id="input-c8" name="c8" type="hidden" value="{{c[7]}}"/>
+                                    <td class="integrate">{{inte_lis[7]}}</td>
+                                    {% if red_lis[7] is True %}
+                                    <td class="red_line"><input checked="false" name="yy8" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[7] is False %}
+                                    <td class="red_line"><input name="yy8" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr9" style="{{table_css[8]}}">
+                                    <th scope="row">9</th>
+                                    <td class="peak-td" contenteditable="true" id="a9">{{a[8]}}</td>
+                                    <input id="input-a9" name="a9" type="hidden" value="{{a[8]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b9">{{b[8]}}</td>
+                                    <input id="input-b9" name="b9" type="hidden" value="{{b[8]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c9">{{c[8]}}</td>
+                                    <input id="input-c9" name="c9" type="hidden" value="{{c[8]}}"/>
+                                    <td class="integrate">{{inte_lis[8]}}</td>
+                                    {% if red_lis[8] is True %}
+                                    <td class="red_line"><input checked="false" name="yy9" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[8] is False %}
+                                    <td class="red_line"><input name="yy9" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr10" style="{{table_css[9]}}">
+                                    <th scope="row">10</th>
+                                    <td class="peak-td" contenteditable="true" id="a10">{{a[9]}}</td>
+                                    <input id="input-a10" name="a10" type="hidden" value="{{a[9]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b10">{{b[9]}}</td>
+                                    <input id="input-b10" name="b10" type="hidden" value="{{b[9]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c10">{{c[9]}}</td>
+                                    <input id="input-c10" name="c10" type="hidden" value="{{c[9]}}"/>
+                                    <td class="integrate">{{inte_lis[9]}}</td>
+                                    {% if red_lis[9] is True %}
+                                    <td class="red_line"><input checked="false" name="yy10" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[9] is False %}
+                                    <td class="red_line"><input name="yy10" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr11" style="{{table_css[10]}}">
+                                    <th scope="row">11</th>
+                                    <td class="peak-td" contenteditable="true" id="a11">{{a[10]}}</td>
+                                    <input id="input-a11" name="a11" type="hidden" value="{{a[10]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b11">{{b[10]}}</td>
+                                    <input id="input-b11" name="b11" type="hidden" value="{{b[10]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c11">{{c[10]}}</td>
+                                    <input id="input-c11" name="c11" type="hidden" value="{{c[10]}}"/>
+                                    <td class="integrate">{{inte_lis[10]}}</td>
+                                    {% if red_lis[10] is True %}
+                                    <td class="red_line"><input checked="false" name="yy11" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[10] is False %}
+                                    <td class="red_line"><input name="yy11" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr12" style="{{table_css[11]}}">
+                                    <th scope="row">12</th>
+                                    <td class="peak-td" contenteditable="true" id="a12">{{a[11]}}</td>
+                                    <input id="input-a12" name="a12" type="hidden" value="{{a[11]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b12">{{b[11]}}</td>
+                                    <input id="input-b12" name="b12" type="hidden" value="{{b[11]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c12">{{c[11]}}</td>
+                                    <input id="input-c12" name="c12" type="hidden" value="{{c[11]}}"/>
+                                    <td class="integrate">{{inte_lis[11]}}</td>
+                                    {% if red_lis[11] is True %}
+                                    <td class="red_line"><input checked="false" name="yy12" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[11] is False %}
+                                    <td class="red_line"><input name="yy12" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr13" style="{{table_css[12]}}">
+                                    <th scope="row">13</th>
+                                    <td class="peak-td" contenteditable="true" id="a13">{{a[12]}}</td>
+                                    <input id="input-a13" name="a13" type="hidden" value="{{a[12]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b13">{{b[12]}}</td>
+                                    <input id="input-b13" name="b13" type="hidden" value="{{b[12]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c13">{{c[12]}}</td>
+                                    <input id="input-c13" name="c13" type="hidden" value="{{c[12]}}"/>
+                                    <td class="integrate">{{inte_lis[12]}}</td>
+                                    {% if red_lis[12] is True %}
+                                    <td class="red_line"><input checked="false" name="yy13" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[12] is False %}
+                                    <td class="red_line"><input name="yy13" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr14" style="{{table_css[13]}}">
+                                    <th scope="row">14</th>
+                                    <td class="peak-td" contenteditable="true" id="a14">{{a[13]}}</td>
+                                    <input id="input-a14" name="a14" type="hidden" value="{{a[13]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b14">{{b[13]}}</td>
+                                    <input id="input-b14" name="b14" type="hidden" value="{{b[13]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c14">{{c[13]}}</td>
+                                    <input id="input-c14" name="c14" type="hidden" value="{{c[13]}}"/>
+                                    <td class="integrate">{{inte_lis[13]}}</td>
+                                    {% if red_lis[13] is True %}
+                                    <td class="red_line"><input checked="false" name="yy14" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[13] is False %}
+                                    <td class="red_line"><input name="yy14" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr15" style="{{table_css[14]}}">
+                                    <th scope="row">15</th>
+                                    <td class="peak-td" contenteditable="true" id="a15">{{a[14]}}</td>
+                                    <input id="input-a15" name="a15" type="hidden" value="{{a[14]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b15">{{b[14]}}</td>
+                                    <input id="input-b15" name="b15" type="hidden" value="{{b[14]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c15">{{c[14]}}</td>
+                                    <input id="input-c15" name="c15" type="hidden" value="{{c[14]}}"/>
+                                    <td class="integrate">{{inte_lis[14]}}</td>
+                                    {% if red_lis[14] is True %}
+                                    <td class="red_line"><input checked="false" name="yy15" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[14] is False %}
+                                    <td class="red_line"><input name="yy15" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr16" style="{{table_css[15]}}">
+                                    <th scope="row">16</th>
+                                    <td class="peak-td" contenteditable="true" id="a16">{{a[15]}}</td>
+                                    <input id="input-a16" name="a16" type="hidden" value="{{a[15]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b16">{{b[15]}}</td>
+                                    <input id="input-b16" name="b16" type="hidden" value="{{b[15]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c16">{{c[15]}}</td>
+                                    <input id="input-c16" name="c16" type="hidden" value="{{c[15]}}"/>
+                                    <td class="integrate">{{inte_lis[15]}}</td>
+                                    {% if red_lis[15] is True %}
+                                    <td class="red_line"><input checked="false" name="yy16" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[15] is False %}
+                                    <td class="red_line"><input name="yy16" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr17" style="{{table_css[16]}}">
+                                    <th scope="row">17</th>
+                                    <td class="peak-td" contenteditable="true" id="a17">{{a[16]}}</td>
+                                    <input id="input-a17" name="a17" type="hidden" value="{{a[16]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b17">{{b[16]}}</td>
+                                    <input id="input-b17" name="b17" type="hidden" value="{{b[16]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c17">{{c[16]}}</td>
+                                    <input id="input-c17" name="c17" type="hidden" value="{{c[16]}}"/>
+                                    <td class="integrate">{{inte_lis[16]}}</td>
+                                    {% if red_lis[16] is True %}
+                                    <td class="red_line"><input checked="false" name="yy17" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[16] is False %}
+                                    <td class="red_line"><input name="yy17" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr18" style="{{table_css[17]}}">
+                                    <th scope="row">18</th>
+                                    <td class="peak-td" contenteditable="true" id="a18">{{a[17]}}</td>
+                                    <input id="input-a18" name="a18" type="hidden" value="{{a[17]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b18">{{b[17]}}</td>
+                                    <input id="input-b18" name="b18" type="hidden" value="{{b[17]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c18">{{c[17]}}</td>
+                                    <input id="input-c18" name="c18" type="hidden" value="{{c[17]}}"/>
+                                    <td class="integrate">{{inte_lis[17]}}</td>
+                                    {% if red_lis[17] is True %}
+                                    <td class="red_line"><input checked="false" name="yy18" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[17] is False %}
+                                    <td class="red_line"><input name="yy18" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr19" style="{{table_css[18]}}">
+                                    <th scope="row">19</th>
+                                    <td class="peak-td" contenteditable="true" id="a19">{{a[18]}}</td>
+                                    <input id="input-a19" name="a19" type="hidden" value="{{a[18]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b19">{{b[18]}}</td>
+                                    <input id="input-b19" name="b19" type="hidden" value="{{b[18]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c19">{{c[18]}}</td>
+                                    <input id="input-c19" name="c19" type="hidden" value="{{c[18]}}"/>
+                                    <td class="integrate">{{inte_lis[18]}}</td>
+                                    {% if red_lis[18] is True %}
+                                    <td class="red_line"><input checked="false" name="yy19" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[18] is False %}
+                                    <td class="red_line"><input name="yy19" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                <tr id="tr20" style="{{table_css[19]}}">
+                                    <th scope="row">20</th>
+                                    <td class="peak-td" contenteditable="true" id="a20">{{a[19]}}</td>
+                                    <input id="input-a20" name="a20" type="hidden" value="{{a[19]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="b20">{{b[19]}}</td>
+                                    <input id="input-b20" name="b20" type="hidden" value="{{b[19]}}"/>
+                                    <td class="peak-td" contenteditable="true" id="c20">{{c[19]}}</td>
+                                    <input id="input-c20" name="c20" type="hidden" value="{{c[19]}}"/>
+                                    <td class="integrate">{{inte_lis[19]}}</td>
+                                    {% if red_lis[19] is True %}
+                                    <td class="red_line"><input checked="false" name="yy20" type="checkbox"/></td>
+                                    {% end %}
+                                    {% if red_lis[19] is False %}
+                                    <td class="red_line"><input name="yy20" type="checkbox"/></td>
+                                    {% end %}
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">添加溶剂峰</span>
+                                </div>
+                                <input class="form-control" name="solvent_start" type="text" value="{{extra[0]}}">
+                                <input class="form-control" name="solvent_end" type="text" value="{{extra[1]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">单位：分钟</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingTwo">
+                        <h2 class="mb-0">
+                            <button aria-controls="collapseTwo" aria-expanded="false"
+                                    class="btn btn-link btn-block text-left collapsed" data-target="#collapseTwo"
+                                    data-toggle="collapse"
+                                    type="button">
+                                风格参数
+                            </button>
+                        </h2>
+                    </div>
+                    <div aria-labelledby="headingTwo" class="collapse" data-parent="#accordionExample" id="collapseTwo">
+                        <div class="card-body">
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">x轴主次刻度间隔</span>
+                                </div>
+                                <input class="form-control" name="x_major_num" type="text" value="{{style[0]}}">
+                                <input class="form-control" name="x_minor_num" type="text" value="{{style[1]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">单位：刻度轴单位</span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">x轴主次刻度线长度</span>
+                                </div>
+                                <input class="form-control" name="x_major_len" type="text" value="{{style[2]}}">
+                                <input class="form-control" name="x_minor_len" type="text" value="{{style[3]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">单位：刻度轴单位</span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">x轴刻度线颜色</span>
+                                </div>
+                                <input class="form-control" name="x_tick_color" type="text" value="{{style[9]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">仅支持16进制颜色代码</span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">y轴主次刻度间隔</span>
+                                </div>
+                                <input class="form-control" name="y_major_num" type="text" value="{{style[4]}}">
+                                <input class="form-control" name="y_minor_num" type="text" value="{{style[5]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">单位：刻度轴单位</span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">y轴主次刻度线长度</span>
+                                </div>
+                                <input class="form-control" name="y_major_len" type="text" value="{{style[6]}}">
+                                <input class="form-control" name="y_minor_len" type="text" value="{{style[7]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">即与y轴标签间隔距离</span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">y轴刻度线颜色</span>
+                                </div>
+                                <input class="form-control" name="y_tick_color" type="text" value="{{style[10]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">仅支持16进制颜色代码</span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">采用ChemStation风格</span>
+                                </div>
+                                <input class="form-control" name="chem" type="text" value="{{style[8]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">请填yes或者no</span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">曲线颜色</span>
+                                </div>
+                                <input class="form-control" name="curve_color" type="text" value="{{style[11]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">仅支持16进制颜色代码</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingThree">
+                        <h2 class="mb-0">
+                            <button aria-controls="collapseThree" aria-expanded="false"
+                                    class="btn btn-link btn-block text-left collapsed" data-target="#collapseThree"
+                                    data-toggle="collapse"
+                                    type="button">
+                                图像参数
+                            </button>
+                        </h2>
+                    </div>
+                    <div aria-labelledby="headingThree" class="collapse" data-parent="#accordionExample"
+                         id="collapseThree">
+                        <div class="card-body">
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">线条粗细度</span>
+                                </div>
+                                <input class="form-control" name="line_width" type="text" value="{{args[0]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">可取 (0,2] 之间的小数</span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">X轴显示范围</span>
+                                </div>
+                                <input class="form-control" name="x_start" type="text" value="{{args[1]}}">
+                                <input class="form-control" name="x_end" type="text" value="{{args[2]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">单位：分钟</span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Y轴显示范围</span>
+                                </div>
+                                <input class="form-control" name="y_start" type="text" value="{{args[3]}}">
+                                <input class="form-control" name="y_end" type="text" value="{{args[4]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">单位：峰值</span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">图像宽高比例</span>
+                                </div>
+                                <input class="form-control" name="width_ratio" type="text" value="{{args[5]}}">
+                                <input class="form-control" name="height_ratio" type="text" value="{{args[6]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">整数</span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">分辨率DPI</span>
+                                </div>
+                                <input class="form-control" name="dpi" type="text" value="{{args[7]}}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">DPI越高图像越清晰</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: center; margin-top: 30px">
+            <button class="btn btn-primary" type="submit">画图</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
